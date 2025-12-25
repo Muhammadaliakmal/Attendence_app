@@ -22,7 +22,6 @@ import {
   Empty
 } from "antd";
 import { 
-  UserOutlined, 
   EditOutlined, 
   DeleteOutlined,
   CheckCircleFilled,
@@ -56,7 +55,7 @@ type AttendanceRecord = {
 };
 
 // --- Constants & Config ---
-const PRIMARY_COLOR = '#4f46e5'; // Indigo 600
+
 
 export default function App() {
   // --- State Management ---
@@ -249,7 +248,7 @@ export default function App() {
     {
       title: 'STUDENT',
       dataIndex: 'name',
-      render: (name: string, record: Student) => (
+      render: (name: string) => (
         <Space>
            <Avatar 
             style={{ backgroundColor: '#f1f5f9', color: '#64748b', fontWeight: 600 }} 

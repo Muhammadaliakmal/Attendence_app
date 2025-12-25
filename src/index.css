@@ -35,7 +35,8 @@
 }
 
 .ant-card {
-  @apply !rounded-2xl !border-slate-200/60 !shadow-subtle;
+  @apply !rounded-2xl !border-slate-200/60;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
 }
 
 .ant-card-head {
