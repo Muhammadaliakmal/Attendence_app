@@ -44,7 +44,7 @@ const AddExamPage: React.FC = () => {
         return qs.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
     };
 
-    const handleQuestionChange = (index: number, field: keyof FormQuestion, value: any) => {
+    const handleQuestionChange = (index: number, field: keyof FormQuestion, value: string | number | null) => {
         const newQuestions = [...questions];
         newQuestions[index] = { ...newQuestions[index], [field]: value };
         setQuestions(newQuestions);
@@ -167,9 +167,10 @@ const AddExamPage: React.FC = () => {
             message.success("Exam created successfully!");
             navigate('/exams');
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error);
-            message.error("Error saving exam: " + error.message);
+            const msg = error instanceof Error ? error.message : "Unknown error";
+            message.error("Error saving exam: " + msg);
         } finally {
             setLoading(false);
         }

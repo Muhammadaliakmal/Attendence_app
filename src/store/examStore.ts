@@ -176,9 +176,10 @@ export const useExamStore = create<ExamState>()(
                         };
                     });
 
-                } catch (err: any) {
+                } catch (err: unknown) {
                     console.error('Failed to start exam:', err);
-                    set({ error: 'Failed to start exam session: ' + err.message, loading: false });
+                    const msg = err instanceof Error ? err.message : String(err);
+                    set({ error: 'Failed to start exam session: ' + msg, loading: false });
                 }
             },
 
@@ -215,7 +216,12 @@ export const useExamStore = create<ExamState>()(
 
                 // Calculate Score Locally
                 let totalScore = 0;
-                const studentAnswersPayload: any[] = [];
+                const studentAnswersPayload: {
+                    student_exam_id: number;
+                    question_id: number;
+                    selected_option_id: number;
+                    marks_obtained: number;
+                }[] = [];
 
                 exam.questions.forEach(q => {
                     const selectedOptId = answers[q.id];
@@ -260,10 +266,11 @@ export const useExamStore = create<ExamState>()(
 
                         if (updateError) throw updateError;
 
-                    } catch (err: any) {
+                    } catch (err: unknown) {
                         console.error('Failed to submit exam:', err);
                         // We still set submitted locally so user doesn't get stuck
-                        set({ error: 'Failed to save results: ' + err.message });
+                        const msg = err instanceof Error ? err.message : String(err);
+                        set({ error: 'Failed to save results: ' + msg });
                     }
                 }
 

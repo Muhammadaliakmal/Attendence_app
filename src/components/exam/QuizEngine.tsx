@@ -13,7 +13,6 @@ export const QuizEngine: React.FC = () => {
     const navigate = useNavigate();
     const { 
         exams, 
-        activeExamId, 
         timer, 
         tickTimer, 
         submitAnswer, 
@@ -164,10 +163,29 @@ export const QuizEngine: React.FC = () => {
                      
                      {currentQIndex === exam.questions.length - 1 ? (
                         <button
-                            onClick={submitExam}
-                            className="flex items-center gap-2 px-8 py-3 bg-gray-900 text-white rounded-lg font-bold hover:bg-gray-800 shadow-lg shadow-gray-900/20 active:scale-95 transition-all"
+                            onClick={async () => {
+                                try {
+                                    await submitExam();
+                                } catch (e) {
+                                    console.error("Submission failed", e);
+                                }
+                            }}
+                            disabled={loading}
+                            className={cn(
+                                "flex items-center gap-2 px-8 py-3 rounded-lg font-bold shadow-lg transition-all",
+                                loading 
+                                    ? "bg-gray-400 cursor-not-allowed" 
+                                    : "bg-gray-900 text-white hover:bg-gray-800 shadow-gray-900/20 active:scale-95"
+                            )}
                         >
-                            Submit Exam
+                            {loading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                                    Submitting...
+                                </>
+                            ) : (
+                                "Submit Exam"
+                            )}
                         </button>
                      ) : (
                          <button

@@ -55,6 +55,7 @@ const ExamReportsPage: React.FC = () => {
             if (error) {
                 console.error("Error fetching report:", error);
             } else if (data) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const rows = data.map((item: any) => ({
                     key: item.id,
                     student_name: item.student?.name || 'Unknown',

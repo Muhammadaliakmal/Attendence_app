@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, ChevronRight, Trash2, FileBarChart, Trophy } from 'lucide-react';
+import { Clock, ChevronRight, Trash2, FileBarChart } from 'lucide-react';
 import type { Exam } from '../../lib/types';
 import { useExamStore } from '../../store/examStore';
 import { useNavigate } from 'react-router-dom';
