@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Table, Tag, Card } from 'antd';
-import { ArrowLeft, Download, Trophy, Users, Clock, TrendingUp, Award, Target } from 'lucide-react';
+import { ArrowLeft, Download, Trophy, Users, TrendingUp, Award, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import supabase from '../configdb/supabase';
 import { useExamStore } from '../store/examStore';
