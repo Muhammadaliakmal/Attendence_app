@@ -31,7 +31,8 @@ import {
   SearchOutlined,
   TeamOutlined,
   CheckSquareOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  ReadOutlined
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
@@ -101,16 +102,28 @@ export default function Dashboard() {
   };
 
   // --- Effects ---
+  
+   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchStudents();
   }, []);
 
+
+   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAttendance(today);
-  }, []);
+  }, [today]);
 
   // --- Handlers ---
-  const handleSubmit = async (values: any) => {
+  interface StudentFormValues {
+    name: string;
+    roll_num: string;
+    status: string;
+  }
+
+  const handleSubmit = async (values: StudentFormValues) => {
     setLoading(true);
     let error;
     
@@ -249,7 +262,7 @@ export default function Dashboard() {
       key: 'actions',
       width: 150,
       align: 'right' as const,
-      render: (_: any, record: Student) => (
+      render: (_: unknown, record: Student) => (
         <Space size="small">
           <Button 
             type="text" 
@@ -294,7 +307,7 @@ export default function Dashboard() {
       title: 'ATTENDANCE',
       key: 'action',
       align: 'right' as const,
-      render: (_: any, record: Student) => {
+      render: (_: unknown, record: Student) => {
         const status = getAttendanceStatus(record.id);
         const isPresent = status === 'present';
         const isAbsent = status === 'absent';
@@ -344,14 +357,24 @@ export default function Dashboard() {
           </div>
           <span className="text-lg font-bold tracking-tight text-slate-800">Class<span className="text-indigo-600">Mate</span></span>
         </div>
-        <Button 
-            type="text" 
-            icon={<LogoutOutlined />} 
-            onClick={handleLogout}
-            className="text-slate-500 hover:text-rose-500"
-        >
-            Logout
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button 
+              type="default" 
+              icon={<ReadOutlined />} 
+              onClick={() => navigate('/exams')}
+              className="text-slate-600 hover:text-indigo-600 hover:border-indigo-600"
+          >
+              Exams
+          </Button>
+          <Button 
+              type="text" 
+              icon={<LogoutOutlined />} 
+              onClick={handleLogout}
+              className="text-slate-500 hover:text-rose-500"
+          >
+              Logout
+          </Button>
+        </div>
       </Header>
 
       <Content className="max-w-6xl mx-auto w-full p-6 sm:p-8">

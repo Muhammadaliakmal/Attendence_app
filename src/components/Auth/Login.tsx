@@ -9,7 +9,12 @@ const { Title, Text } = Typography;
 export default function Login() {
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (values: any) => {
+  interface LoginValues {
+    email: string;
+    password: string;
+  }
+
+  const handleLogin = async (values: LoginValues) => {
     setLoading(true);
     const { email, password } = values;
     const { error } = await supabase.auth.signInWithPassword({

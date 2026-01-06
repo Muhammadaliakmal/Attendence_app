@@ -10,7 +10,12 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = async (values: any) => {
+  interface SignupValues {
+    email: string;
+    password: string;
+  }
+
+  const handleSignup = async (values: SignupValues) => {
     setLoading(true);
     const { email, password } = values;
     
