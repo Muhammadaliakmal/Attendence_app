@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Tag, Card, Button } from 'antd';
-import { ArrowLeft, Download, Trophy, Users, Clock } from 'lucide-react';
+import { Table, Tag, Card } from 'antd';
+import { ArrowLeft, Download, Trophy, Users, Clock, TrendingUp, Award, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
 import supabase from '../configdb/supabase';
 import { useExamStore } from '../store/examStore';
 import dayjs from 'dayjs';
@@ -35,8 +36,6 @@ const ExamReportsPage: React.FC = () => {
             if (!examId) return;
             setLoading(true);
 
-            // Fetch student_exam joined with studentsTable
-            // Note: Supabase join syntax with alias
             const { data, error } = await supabase
                 .from('student_exam')
                 .select(`
@@ -75,16 +74,29 @@ const ExamReportsPage: React.FC = () => {
 
     const columns = [
         {
+            title: 'Rank',
+            key: 'rank',
+            width: 80,
+            render: (_: unknown, __: unknown, index: number) => (
+                <div className="flex items-center gap-2">
+                    {index === 0 && <Trophy className="text-amber-500" size={18} />}
+                    {index === 1 && <Award className="text-gray-400" size={18} />}
+                    {index === 2 && <Award className="text-orange-400" size={18} />}
+                    <span className="font-bold text-gray-900">#{index + 1}</span>
+                </div>
+            )
+        },
+        {
             title: 'Student Name',
             dataIndex: 'student_name',
             key: 'student_name',
-            render: (text: string) => <span className="font-medium text-gray-900">{text}</span>
+            render: (text: string) => <span className="font-semibold text-gray-900">{text}</span>
         },
         {
             title: 'Roll Number',
             dataIndex: 'roll_num',
             key: 'roll_num',
-            render: (text: string) => <Tag>{text}</Tag>
+            render: (text: string) => <Tag color="blue">{text}</Tag>
         },
         {
             title: 'Score',
@@ -93,14 +105,17 @@ const ExamReportsPage: React.FC = () => {
             render: (score: number, record: ResultRow) => {
                 const percentage = Math.round((score / (record.total_marks || 1)) * 100);
                 let color = 'red';
-                if (percentage >= 80) color = 'green';
-                else if (percentage >= 60) color = 'blue';
-                else if (percentage >= 40) color = 'orange';
+                let bgColor = 'bg-red-50';
+                if (percentage >= 80) { color = 'green'; bgColor = 'bg-green-50'; }
+                else if (percentage >= 60) { color = 'blue'; bgColor = 'bg-blue-50'; }
+                else if (percentage >= 40) { color = 'orange'; bgColor = 'bg-orange-50'; }
 
                 return (
                     <div className="flex flex-col">
                         <span className={`font-bold text-${color}-600`}>{score} / {record.total_marks}</span>
-                        <span className="text-xs text-gray-400">{percentage}%</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${bgColor} text-${color}-700 font-semibold inline-block w-fit`}>
+                            {percentage}%
+                        </span>
                     </div>
                 );
             },
@@ -111,7 +126,7 @@ const ExamReportsPage: React.FC = () => {
             dataIndex: 'status',
             key: 'status',
             render: (status: string) => (
-                <Tag color={status === 'completed' ? 'success' : 'processing'}>
+                <Tag color={status === 'submitted' ? 'success' : 'processing'} className="font-semibold">
                     {status.toUpperCase()}
                 </Tag>
             )
@@ -121,113 +136,190 @@ const ExamReportsPage: React.FC = () => {
             dataIndex: 'submitted_at',
             key: 'submitted_at',
             render: (date: string) => (
-                <span className="text-gray-500 text-sm">
+                <span className="text-gray-600 text-sm">
                     {date ? dayjs(date).format('MMM D, YYYY h:mm A') : '-'}
                 </span>
             )
         }
     ];
 
-    if (!exam && !loading) return <div>Exam not found</div>;
-
     const exportCSV = () => {
-         const headers = ['Student Name', 'Roll Number', 'Score', 'Status', 'Submitted At'];
-         const csvContent = [
-             headers.join(','),
-             ...results.map(r => [
-                 r.student_name, 
-                 r.roll_num, 
-                 r.score, 
-                 r.status, 
-                 r.submitted_at
-             ].join(','))
-         ].join('\n');
+        const headers = ['Rank', 'Student Name', 'Roll Number', 'Score', 'Status', 'Submitted At'];
+        const csvContent = [
+            headers.join(','),
+            ...results.map((r, idx) => [
+                idx + 1,
+                r.student_name, 
+                r.roll_num, 
+                `${r.score}/${r.total_marks}`, 
+                r.status, 
+                r.submitted_at
+            ].join(','))
+        ].join('\n');
 
-         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-         const link = document.createElement("a");
-         const url = URL.createObjectURL(blob);
-         link.setAttribute("href", url);
-         link.setAttribute("download", `${exam?.exam_name || 'exam'}_report.csv`);
-         link.style.visibility = 'hidden';
-         document.body.appendChild(link);
-         link.click();
-         document.body.removeChild(link);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${exam?.exam_name || 'exam'}_report.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50 p-6 md:p-12">
-            <div className="max-w-6xl mx-auto">
-                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <button 
-                            onClick={() => navigate('/exams')} 
-                            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-2 transition-colors"
-                        >
-                            <ArrowLeft size={16} /> Back to Exams
-                        </button>
-                        <h1 className="text-3xl font-bold text-gray-900">{exam?.exam_name} Report</h1>
-                        <p className="text-gray-500 mt-1">
-                            Analyics and attendee results
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button icon={<Download size={16} />} onClick={exportCSV}>
-                            Export CSV
-                        </Button>
-                    </div>
+    const avgScore = results.length > 0 
+        ? Math.round(results.reduce((acc, curr) => acc + curr.score, 0) / results.length) 
+        : 0;
+    
+    const highestScore = results.length > 0 ? Math.max(...results.map(r => r.score)) : 0;
+    const passRate = results.length > 0
+        ? Math.round((results.filter(r => (r.score / r.total_marks) >= 0.5).length / results.length) * 100)
+        : 0;
+
+    if (!exam && !loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-12 flex items-center justify-center">
+                <div className="bg-white rounded-2xl p-8 shadow-xl text-center">
+                    <p className="text-gray-600">Exam not found</p>
+                    <button onClick={() => navigate('/exams')} className="mt-4 text-blue-600 underline">
+                        Return to Exams
+                    </button>
                 </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-12">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                >
+                    <button 
+                        onClick={() => navigate('/exams')} 
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors font-medium"
+                    >
+                        <ArrowLeft size={20} /> Back to Exams
+                    </button>
+                    
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                                {exam?.exam_name} Report
+                            </h1>
+                            <p className="text-gray-600">
+                                Analytics and student performance overview
+                            </p>
+                        </div>
+                        <button
+                            onClick={exportCSV}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-lg"
+                        >
+                            <Download size={18} />
+                            Export CSV
+                        </button>
+                    </div>
+                </motion.div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card bordered={false} className="shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                                <Users size={24} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg">
+                                    <Users size={28} />
+                                </div>
+                                <div>
+                                    <p className="text-gray-600 text-sm font-medium">Total Attendees</p>
+                                    <p className="text-3xl font-bold text-gray-900">{results.length}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-gray-500 text-sm">Total Attendees</p>
-                                <p className="text-2xl font-bold text-gray-900">{results.length}</p>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-green-50 to-emerald-50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white flex items-center justify-center shadow-lg">
+                                    <Trophy size={28} />
+                                </div>
+                                <div>
+                                    <p className="text-gray-600 text-sm font-medium">Average Score</p>
+                                    <p className="text-3xl font-bold text-gray-900">{avgScore}</p>
+                                </div>
                             </div>
-                        </div>
-                    </Card>
-                    <Card bordered={false} className="shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-                                <Trophy size={24} />
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-amber-50 to-orange-50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 text-white flex items-center justify-center shadow-lg">
+                                    <Target size={28} />
+                                </div>
+                                <div>
+                                    <p className="text-gray-600 text-sm font-medium">Highest Score</p>
+                                    <p className="text-3xl font-bold text-gray-900">{highestScore}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-gray-500 text-sm">Average Score</p>
-                                <p className="text-2xl font-bold text-gray-900">
-                                    {results.length > 0 
-                                        ? Math.round(results.reduce((acc, curr) => acc + curr.score, 0) / results.length) 
-                                        : 0}
-                                </p>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                    >
+                        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-purple-50 to-pink-50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg">
+                                    <TrendingUp size={28} />
+                                </div>
+                                <div>
+                                    <p className="text-gray-600 text-sm font-medium">Pass Rate</p>
+                                    <p className="text-3xl font-bold text-gray-900">{passRate}%</p>
+                                </div>
                             </div>
-                        </div>
-                    </Card>
-                    <Card bordered={false} className="shadow-sm">
-                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
-                                <Clock size={24} />
-                            </div>
-                            <div>
-                                <p className="text-gray-500 text-sm">Exam Duration</p>
-                                <p className="text-2xl font-bold text-gray-900">{Math.floor((exam?.exam_duration || 0)/60)} min</p>
-                            </div>
-                        </div>
-                    </Card>
+                        </Card>
+                    </motion.div>
                 </div>
 
                 {/* Results Table */}
-                <Card bordered={false} className="shadow-sm">
-                    <h3 className="font-bold text-gray-900 mb-6">Attendee List</h3>
-                    <Table 
-                        columns={columns} 
-                        dataSource={results} 
-                        loading={loading}
-                        pagination={{ pageSize: 10 }}
-                    />
-                </Card>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                >
+                    <Card className="border-0 shadow-xl">
+                        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <Users className="text-blue-600" size={24} />
+                            Student Performance
+                        </h3>
+                        <Table 
+                            columns={columns} 
+                            dataSource={results} 
+                            loading={loading}
+                            pagination={{ pageSize: 10, showSizeChanger: true }}
+                            className="premium-table"
+                        />
+                    </Card>
+                </motion.div>
             </div>
         </div>
     );

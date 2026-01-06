@@ -21,19 +21,19 @@ import {
   Empty
 } from "antd";
 import { 
-  EditOutlined, 
-  DeleteOutlined,
-  CheckCircleFilled,
-  CloseCircleFilled,
-  ClockCircleFilled,
-  CalendarOutlined,
-  PlusOutlined,
-  SearchOutlined,
-  TeamOutlined,
-  CheckSquareOutlined,
-  LogoutOutlined,
-  ReadOutlined
-} from "@ant-design/icons";
+  Edit2, 
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Calendar,
+  Plus,
+  Search,
+  Users,
+  CheckSquare,
+  LogOut,
+  BookOpen
+} from "lucide-react";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
@@ -266,12 +266,13 @@ export default function Dashboard() {
         <Space size="small">
           <Button 
             type="text" 
-            icon={<EditOutlined className="text-slate-400 hover:text-indigo-600" />} 
+            icon={<Edit2 size={16} className="text-slate-400" />} 
             onClick={() => {
               setEditingId(record.id);
               form.setFieldsValue(record);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            className="hover:!text-indigo-600"
           />
           <Popconfirm
             title="Delete student?"
@@ -281,7 +282,7 @@ export default function Dashboard() {
             cancelText="Cancel"
             okButtonProps={{ danger: true }}
           >
-            <Button type="text" danger icon={<DeleteOutlined className="opacity-60 hover:opacity-100" />} />
+            <Button type="text" danger icon={<Trash2 size={16} />} className="opacity-60 hover:opacity-100" />
           </Popconfirm>
         </Space>
       ),
@@ -316,28 +317,25 @@ export default function Dashboard() {
         return (
           <div className="flex justify-end gap-2">
             <Button
-              className={`min-w-[40px] border-0 transition-all ${isPresent ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
-              icon={<CheckCircleFilled />}
+              className={`min-w-[40px] !border-0 !rounded-lg transition-all hover-lift ${isPresent ? '!bg-emerald-100 !text-emerald-700 !shadow-sm' : '!bg-slate-50 !text-slate-400 hover:!bg-slate-100'}`}
+              icon={<CheckCircle size={16} />}
               onClick={() => markAttendance(record.id, 'present')}
-              shape="default"
             >
               <span className="hidden sm:inline">Present</span>
             </Button>
             
             <Button
-              className={`min-w-[40px] border-0 transition-all ${isAbsent ? 'bg-rose-100 text-rose-700' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
-              icon={<CloseCircleFilled />}
+              className={`min-w-[40px] !border-0 !rounded-lg transition-all hover-lift ${isAbsent ? '!bg-rose-100 !text-rose-700 !shadow-sm' : '!bg-slate-50 !text-slate-400 hover:!bg-slate-100'}`}
+              icon={<XCircle size={16} />}
               onClick={() => markAttendance(record.id, 'absent')}
-              shape="default"
             >
                <span className="hidden sm:inline">Absent</span>
             </Button>
 
             <Button
-              className={`min-w-[40px] border-0 transition-all ${isLate ? 'bg-amber-100 text-amber-700' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
-              icon={<ClockCircleFilled />}
+              className={`min-w-[40px] !border-0 !rounded-lg transition-all hover-lift ${isLate ? '!bg-amber-100 !text-amber-700 !shadow-sm' : '!bg-slate-50 !text-slate-400 hover:!bg-slate-100'}`}
+              icon={<Clock size={16} />}
               onClick={() => markAttendance(record.id, 'late')}
-              shape="default"
             >
                <span className="hidden sm:inline">Late</span>
             </Button>
@@ -350,27 +348,27 @@ export default function Dashboard() {
   // --- Render ---
   return (
     <Layout className="min-h-screen bg-slate-50/50">
-      <Header className="bg-white sticky top-0 z-50 px-6 h-16 flex items-center justify-between border-b border-slate-100 shadow-sm">
+      <Header className="glass-dark sticky top-0 z-50 px-6 h-16 flex items-center justify-between border-b border-white/20 shadow-soft backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-indigo-200 shadow-lg">
-            <CheckSquareOutlined className="text-lg" />
+          <div className="w-10 h-10 rounded-xl gradient-premium flex items-center justify-center text-white shadow-glow animate-pulse-glow">
+            <CheckSquare size={20} />
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-800">Class<span className="text-indigo-600">Mate</span></span>
+          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">AttendFlow</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Button 
               type="default" 
-              icon={<ReadOutlined />} 
+              icon={<BookOpen size={18} />} 
               onClick={() => navigate('/exams')}
-              className="text-slate-600 hover:text-indigo-600 hover:border-indigo-600"
+              className="!h-10 hover-lift"
           >
               Exams
           </Button>
           <Button 
               type="text" 
-              icon={<LogoutOutlined />} 
+              icon={<LogOut size={18} />} 
               onClick={handleLogout}
-              className="text-slate-500 hover:text-rose-500"
+              className="!text-rose-500 hover:!text-rose-600 !h-10"
           >
               Logout
           </Button>
@@ -384,7 +382,7 @@ export default function Dashboard() {
           items={[
             {
               key: 'students',
-              label: (<span><TeamOutlined className="mr-1" /> Students</span>),
+              label: (<span className="flex items-center gap-2"><Users size={16} /> Students</span>),
               children: (
                 <div className="animate-fade-in space-y-8">
                   {/* Summary Cards */}
@@ -464,7 +462,7 @@ export default function Dashboard() {
                                 loading={loading} 
                                 block 
                                 size="large"
-                                icon={<PlusOutlined />}
+                                icon={<Plus size={18} />}
                               >
                                 {editingId ? 'Save Changes' : 'Add Student'}
                               </Button>
@@ -485,7 +483,7 @@ export default function Dashboard() {
                     {/* Table Section */}
                     <div className="lg:col-span-2 space-y-4">
                       <Input 
-                        prefix={<SearchOutlined className="text-slate-400" />} 
+                        prefix={<Search size={18} className="text-slate-400" />} 
                         placeholder="Search students..." 
                         className="!bg-transparent !border-0 !border-b !border-slate-200 !rounded-none !shadow-none focus:!border-indigo-500 px-0" 
                         onChange={e => setSearchTerm(e.target.value)}
@@ -509,14 +507,14 @@ export default function Dashboard() {
             },
             {
               key: 'attendance',
-              label: (<span><CalendarOutlined className="mr-1" /> Attendance</span>),
+              label: (<span className="flex items-center gap-2"><Calendar size={16} /> Attendance</span>),
               children: (
                 <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
                   <Card bordered={false} className="shadow-soft bg-white/50 backdrop-blur-sm">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                          <ClockCircleFilled style={{ fontSize: 20 }} />
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center text-indigo-600">
+                          <Clock size={24} />
                         </div>
                         <div>
                           <Text className="block text-slate-500 text-xs font-semibold uppercase tracking-wider">Today's Session</Text>

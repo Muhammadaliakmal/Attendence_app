@@ -16,7 +16,7 @@ interface ExamState {
     // Actions
     fetchExams: () => Promise<void>;
     loadExamData: (examId: number) => Promise<void>;
-    startExam: (examId: number) => Promise<void>;
+    startExam: (examId: number) => Promise<boolean>;
     submitAnswer: (questionId: number, optionId: number) => void;
     submitExam: () => Promise<void>;
     deleteExam: (examId: number) => Promise<void>;
@@ -81,7 +81,7 @@ export const useExamStore = create<ExamState>()(
                 });
             },
 
-            startExam: async (examId) => {
+            startExam: async (examId): Promise<boolean> => {
                 set({ loading: true, error: null });
 
                 // 1. Fetch full exam details
@@ -98,29 +98,29 @@ export const useExamStore = create<ExamState>()(
                     .single();
 
                 if (examError || !examData) {
-                    set({ error: examError?.message || 'Exam not found', loading: false });
-                    return;
+                    const msg = examError?.message || 'Exam not found';
+                    set({ error: msg, loading: false });
+                    return false;
                 }
 
                 // 2. Get User Session
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) {
                     set({ error: 'User not authenticated', loading: false });
-                    return;
+                    return false;
                 }
 
                 // 3. Get or Create Student Record (int8) from studentsTable
-                // Since Auth ID is UUID, we need to map it to our integer-based student table
                 let studentDbId: number | null = null;
                 const userEmail = session.user.email;
                 const userName = userEmail?.split('@')[0] || 'Unknown';
 
                 try {
-                    // Try to find by name (assuming name ~ email user for now)
+                    // Try to find by name
                     const { data: existingStudent } = await supabase
                         .from('studentsTable')
                         .select('id')
-                        .eq('name', userName) // Weak link, but necessary without auth_id in studentsTable
+                        .eq('name', userName)
                         .limit(1)
                         .single();
 
@@ -133,12 +133,14 @@ export const useExamStore = create<ExamState>()(
                             .insert({
                                 name: userName,
                                 roll_num: 'TEMP-' + Math.floor(Math.random() * 10000),
-                                status: 'Active'
+                                status: 'Active',
+                                created_at: new Date().toISOString()
                             })
                             .select()
                             .single();
 
-                        if (createStudentError) throw createStudentError;
+                        if (createStudentError) throw new Error(`Failed to create student record: ${createStudentError.message}`);
+                        if (!newStudent) throw new Error("Created student record is null");
                         studentDbId = newStudent.id;
                     }
 
@@ -152,12 +154,15 @@ export const useExamStore = create<ExamState>()(
                             exam_id: examId,
                             status: 'in_progress',
                             started_at: new Date().toISOString(),
+                            created_at: new Date().toISOString(),
+                            submitted_at: new Date().toISOString(), // Satisfying not-null constraint
                             total_score: 0
                         })
                         .select()
                         .single();
 
-                    if (createError) throw createError;
+                    if (createError) throw new Error(`Failed to create exam session: ${createError.message}`);
+                    if (!studentExam) throw new Error("Created exam session is null");
 
                     set((state) => {
                         const exists = state.exams.some(e => e.id === examId);
@@ -176,10 +181,13 @@ export const useExamStore = create<ExamState>()(
                         };
                     });
 
+                    return true;
+
                 } catch (err: unknown) {
                     console.error('Failed to start exam:', err);
                     const msg = err instanceof Error ? err.message : String(err);
-                    set({ error: 'Failed to start exam session: ' + msg, loading: false });
+                    set({ error: 'Failed to start exam: ' + msg, loading: false });
+                    return false;
                 }
             },
 
@@ -258,7 +266,7 @@ export const useExamStore = create<ExamState>()(
                         const { error: updateError } = await supabase
                             .from('student_exam')
                             .update({
-                                status: 'completed',
+                                status: 'submitted',
                                 submitted_at: new Date().toISOString(),
                                 total_score: totalScore
                             })
@@ -266,15 +274,19 @@ export const useExamStore = create<ExamState>()(
 
                         if (updateError) throw updateError;
 
+                        // Success!
+                        set({ examStatus: 'submitted', loading: false });
+
                     } catch (err: unknown) {
                         console.error('Failed to submit exam:', err);
-                        // We still set submitted locally so user doesn't get stuck
                         const msg = err instanceof Error ? err.message : String(err);
-                        set({ error: 'Failed to save results: ' + msg });
+                        set({ error: 'Failed to save results: ' + msg, loading: false });
+                        // Do NOT set submitted status so user can retry
                     }
+                } else {
+                    // No student ID? Just finish locally (fallback)
+                    set({ examStatus: 'submitted', loading: false });
                 }
-
-                set({ examStatus: 'submitted', loading: false });
             },
 
             deleteExam: async (examId) => {

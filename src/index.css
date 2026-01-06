@@ -1,21 +1,66 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #eef2ff;
+  /* Premium Color Palette */
+  --color-primary-50: #f0f4ff;
   --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
   --color-primary-500: #6366f1;
   --color-primary-600: #4f46e5;
   --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  
+  --color-accent-50: #fdf4ff;
+  --color-accent-500: #d946ef;
+  --color-accent-600: #c026d3;
+  
   --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @layer base {
+  * {
+    @apply transition-colors duration-200;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    @apply bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 text-slate-900 antialiased font-sans;
+    min-height: 100vh;
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer utilities {
+  /* Glass Effects */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  /* Premium Shadows */
   .shadow-subtle {
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
@@ -25,46 +70,154 @@
   }
 
   .shadow-float {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), 0 8px 16px -4px rgba(99, 102, 241, 0.1);
+  }
+
+  .shadow-premium {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Gradient Backgrounds */
+  .gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .gradient-premium {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+  }
+
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(99, 102, 241, 0.15);
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.6s ease-out;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 }
 
-/* Ant Design Overrides for a Premium Scale Feel */
+/* Premium Ant Design Overrides */
+.ant-btn {
+  @apply !font-medium !transition-all !duration-300;
+}
+
 .ant-btn-primary {
-  @apply bg-indigo-600 hover:!bg-indigo-500 shadow-sm border-0;
+  @apply !bg-gradient-to-r !from-indigo-600 !to-indigo-500 hover:!from-indigo-500 hover:!to-indigo-400 !shadow-md hover:!shadow-lg !border-0;
+  transform: translateY(0);
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.ant-btn-default {
+  @apply !bg-white !border-slate-200 hover:!border-indigo-400 hover:!text-indigo-600 !shadow-sm hover:!shadow-md;
 }
 
 .ant-card {
-  @apply !rounded-2xl !border-slate-200/60;
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+  @apply !rounded-2xl !border-slate-200/60 !shadow-soft hover:!shadow-float;
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
 }
 
 .ant-card-head {
-  @apply !border-b-slate-100 !min-h-[56px];
+  @apply !border-b-slate-100 !min-h-[56px] !bg-gradient-to-r !from-slate-50 !to-white;
 }
 
 .ant-card-head-title {
-  @apply !text-slate-800 !font-semibold;
+  @apply !text-slate-800 !font-semibold !text-lg;
 }
 
 .ant-table-wrapper .ant-table-container {
-  @apply !rounded-xl !border !border-slate-200/60;
+  @apply !rounded-xl !border !border-slate-200/60 !overflow-hidden;
 }
 
 .ant-table-thead > tr > th {
-  @apply !bg-slate-50 !text-slate-500 !font-medium !text-xs !uppercase !tracking-wider !border-b-slate-200 !py-4;
+  @apply !bg-gradient-to-r !from-slate-50 !to-slate-100/50 !text-slate-600 !font-semibold !text-xs !uppercase !tracking-wider !border-b-slate-200 !py-4;
+}
+
+.ant-table-tbody > tr {
+  @apply !transition-all !duration-200;
 }
 
 .ant-table-tbody > tr > td {
-  @apply !py-4 !text-slate-700;
+  @apply !py-4 !text-slate-700 !border-b-slate-100;
 }
 
 .ant-table-row:hover > td {
-  @apply !bg-slate-50/50;
+  @apply !bg-indigo-50/30;
 }
 
 .ant-tag {
-  @apply !border-0 !px-2.5 !py-0.5 !rounded-full !font-medium;
+  @apply !border-0 !px-3 !py-1 !rounded-full !font-medium !shadow-sm;
+}
+
+.ant-tabs-nav {
+  @apply !mb-6;
 }
 
 .ant-tabs-nav::before {
@@ -72,7 +225,7 @@
 }
 
 .ant-tabs-tab {
-  @apply !px-0 !pb-4 !mr-8 !text-slate-500 !text-sm !font-medium hover:!text-slate-900 transition-colors;
+  @apply !px-0 !pb-4 !mr-8 !text-slate-500 !text-sm !font-medium hover:!text-slate-900 !transition-all;
 }
 
 .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -80,23 +233,70 @@
 }
 
 .ant-tabs-ink-bar {
-  @apply !bg-indigo-600 !h-[3px] !rounded-t-full;
+  @apply !bg-gradient-to-r !from-indigo-600 !to-purple-600 !h-[3px] !rounded-t-full;
 }
 
-.ant-input, .ant-picker, .ant-select-selector {
-  @apply !rounded-lg !border-slate-200 hover:!border-indigo-400 focus:!border-indigo-500 !shadow-sm !py-2;
+.ant-input, .ant-input-password, .ant-picker, .ant-select-selector {
+  @apply !rounded-xl !border-slate-200 hover:!border-indigo-300 focus:!border-indigo-500 !shadow-sm !py-2.5 !px-4 !transition-all;
 }
 
-/* Custom Scrollbar for a polished feel */
+.ant-input:focus, .ant-input-password:focus, .ant-picker:focus, .ant-select-focused .ant-select-selector {
+  @apply !shadow-md;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+.ant-form-item-label > label {
+  @apply !font-medium !text-slate-700;
+}
+
+.ant-modal-content {
+  @apply !rounded-2xl !shadow-premium;
+}
+
+.ant-modal-header {
+  @apply !rounded-t-2xl !bg-gradient-to-r !from-slate-50 !to-white !border-b-slate-100;
+}
+
+.ant-message-notice-content {
+  @apply !rounded-xl !shadow-lg;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  @apply bg-slate-100/50 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  @apply bg-gradient-to-b from-indigo-400 to-indigo-500 rounded-full hover:from-indigo-500 hover:to-indigo-600;
+  transition: all 0.3s ease;
+}
+
+/* Loading Skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Premium Table Styles */
+.premium-table .ant-table-thead > tr > th {
+  @apply !bg-gradient-to-r !from-indigo-50 !to-purple-50;
+}
+
+.premium-table .ant-table-tbody > tr:nth-child(even) {
+  @apply !bg-slate-50/30;
 }
